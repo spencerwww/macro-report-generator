@@ -128,3 +128,11 @@ def test_fetch_macro_handles_fred_error_gracefully():
     with patch("price_fetcher.Fred", return_value=mock_fred):
         result = fetch_macro()
     assert result["cpi_yoy"]["value"] is None
+
+
+def test_fetch_macro_handles_fred_constructor_failure_gracefully():
+    with patch("price_fetcher.Fred", side_effect=Exception("invalid API key")):
+        result = fetch_macro()
+    for key in ["cpi_yoy", "ppi_mom", "fed_funds", "treasury_10y", "treasury_2y"]:
+        assert result[key]["value"] is None
+        assert "fred.stlouisfed.org" in result[key]["url"]
