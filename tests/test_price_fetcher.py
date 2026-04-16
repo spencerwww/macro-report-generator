@@ -109,10 +109,13 @@ def test_fetch_macro_returns_required_keys():
 
 def test_fetch_macro_values_have_source_and_url():
     mock_fred = MagicMock()
+    # Need 13 data points for YoY calculation, 2 for MoM
     mock_fred.get_series.return_value = pd.Series(
-        [3.3], index=pd.to_datetime(["2026-03-01"])
+        [300.0] * 12 + [313.5],
+        index=pd.date_range("2025-03-01", periods=13, freq="MS")
     )
-    with patch("price_fetcher.Fred", return_value=mock_fred):
+    with patch("price_fetcher.Fred", return_value=mock_fred), \
+         patch.dict("os.environ", {"FRED_API_KEY": "test-key"}):
         result = fetch_macro()
     cpi = result["cpi_yoy"]
     assert "value" in cpi
@@ -120,6 +123,7 @@ def test_fetch_macro_values_have_source_and_url():
     assert "url" in cpi
     assert "as_of" in cpi
     assert "fred.stlouisfed.org" in cpi["url"]
+    assert cpi["value"] is not None  # should be ~4.5% YoY
 
 
 def test_fetch_macro_handles_fred_error_gracefully():
@@ -136,3 +140,16 @@ def test_fetch_macro_handles_fred_constructor_failure_gracefully():
     for key in ["cpi_yoy", "ppi_mom", "fed_funds", "treasury_10y", "treasury_2y"]:
         assert result[key]["value"] is None
         assert "fred.stlouisfed.org" in result[key]["url"]
+
+
+def test_fetch_macro_cpi_yoy_is_calculated_correctly():
+    mock_fred = MagicMock()
+    # 300.0 a year ago, 309.0 now = exactly 3.0% YoY
+    mock_fred.get_series.return_value = pd.Series(
+        [300.0] * 12 + [309.0],
+        index=pd.date_range("2025-03-01", periods=13, freq="MS")
+    )
+    with patch("price_fetcher.Fred", return_value=mock_fred), \
+         patch.dict("os.environ", {"FRED_API_KEY": "test-key"}):
+        result = fetch_macro()
+    assert result["cpi_yoy"]["value"] == pytest.approx(3.0, rel=1e-3)

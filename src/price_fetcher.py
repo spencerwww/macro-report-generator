@@ -94,12 +94,14 @@ FRED_SERIES = {
     "cpi_yoy": {
         "series_id": "CPIAUCSL",
         "url": "https://fred.stlouisfed.org/series/CPIAUCSL",
-        "description": "CPI All Urban Consumers (YoY%)",
+        "description": "CPI All Urban Consumers YoY%",
+        "transform": "yoy_pct",
     },
     "ppi_mom": {
         "series_id": "PPIACO",
         "url": "https://fred.stlouisfed.org/series/PPIACO",
-        "description": "PPI All Commodities",
+        "description": "PPI All Commodities MoM%",
+        "transform": "mom_pct",
     },
     "fed_funds": {
         "series_id": "FEDFUNDS",
@@ -132,8 +134,23 @@ def fetch_macro() -> dict:
     for key, meta in FRED_SERIES.items():
         try:
             series = fred.get_series(meta["series_id"]).dropna()
+            transform = meta.get("transform")
+            if transform == "yoy_pct":
+                # Year-over-year %: compare latest to 12 months prior (monthly series)
+                if len(series) < 13:
+                    value = None
+                else:
+                    value = round((float(series.iloc[-1]) / float(series.iloc[-13]) - 1) * 100, 2)
+            elif transform == "mom_pct":
+                # Month-over-month %: compare latest to prior month
+                if len(series) < 2:
+                    value = None
+                else:
+                    value = round((float(series.iloc[-1]) / float(series.iloc[-2]) - 1) * 100, 2)
+            else:
+                value = round(float(series.iloc[-1]), 4)
             result[key] = {
-                "value": round(float(series.iloc[-1]), 4),
+                "value": value,
                 "as_of": series.index[-1].strftime("%Y-%m-%d"),
                 "source": meta["description"],
                 "url": meta["url"],
