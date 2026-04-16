@@ -1,6 +1,8 @@
 import pytest
-from main import assemble_bundle
-# run_pipeline will be imported in Task 9
+import os
+from unittest.mock import patch, MagicMock
+from pathlib import Path
+from main import assemble_bundle, run_pipeline
 
 
 def test_assemble_bundle_returns_required_keys():
@@ -36,3 +38,22 @@ def test_assemble_bundle_does_not_share_references():
     result = assemble_bundle(prices, {}, [])
     prices["equities"]["SP500"]["value"] = 999.0
     assert result["prices"]["equities"]["SP500"]["value"] == 100.0
+
+
+def test_run_pipeline_saves_file(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "reports").mkdir()
+    (tmp_path / "templates").mkdir()
+    (tmp_path / "templates" / "report_template.md").write_text("# Template")
+
+    with patch("main.fetch_prices", return_value={"equities": {}, "fx": {}, "crypto": {}, "commodities": {}}), \
+         patch("main.fetch_macro", return_value={}), \
+         patch("main.fetch_news", return_value=[]), \
+         patch("main.generate_report", return_value="# MACRO REPORT\n\nContent"), \
+         patch("main.fact_check", return_value="# MACRO REPORT\n\nContent\n\n---\n\n## FACT-CHECK"):
+
+        output_path = run_pipeline()
+
+    assert Path(output_path).exists()
+    content = Path(output_path).read_text()
+    assert "MACRO REPORT" in content
