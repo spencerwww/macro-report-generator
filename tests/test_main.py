@@ -29,3 +29,10 @@ def test_assemble_bundle_passthrough_unchanged():
     assert result["prices"]["equities"]["SP500"]["value"] == 6967.38
     assert result["macro"]["cpi_yoy"]["value"] == 3.3
     assert result["news"][0]["url"] == "https://reuters.com"
+
+
+def test_assemble_bundle_does_not_share_references():
+    prices = {"equities": {"SP500": {"value": 100.0}}}
+    result = assemble_bundle(prices, {}, [])
+    prices["equities"]["SP500"]["value"] = 999.0
+    assert result["prices"]["equities"]["SP500"]["value"] == 100.0

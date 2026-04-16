@@ -54,7 +54,7 @@ def test_fetch_prices_handles_empty_ticker_gracefully():
 def test_fetch_prices_all_fx_pairs_present():
     with patch("price_fetcher.yf.Ticker", return_value=_mock_ticker([1.14, 1.142])):
         result = fetch_prices()
-    for pair in ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD", "DXY"]:
+    for pair in ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD", "DXY", "EURJPY", "GBPJPY", "EURGBP"]:
         assert pair in result["fx"], f"{pair} missing from fx"
 
 

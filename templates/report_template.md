@@ -130,13 +130,16 @@ List 3-5 key upcoming catalysts for the week with dates.
 
 ---
 
-## INSTRUCTIONS FOR CLAUDE (REMOVE THIS SECTION FROM OUTPUT)
+## INSTRUCTIONS FOR CLAUDE (DO NOT INCLUDE THIS SECTION IN YOUR OUTPUT)
+- In the report header, replace {DATE} with today's date from the bundle and {TIME} with the HH:MM from the bundle timestamp.
+- In Sections 3-6, replace all {PLACEHOLDER} tokens (e.g., {PAIR}, {LEVEL}, {BIAS}, {SUPPORT}, {RESISTANCE}, {ASSET}) with actual values from the data bundle.
 - Use ONLY the price values from the data bundle. Do not invent, estimate, or change values.
 - Every specific data point must include an inline [Source: URL] citation from the data bundle.
 - Populate every cell in the ALL-ASSET SUMMARY DASHBOARD tables — no blanks.
 - BIAS options: Bullish / Neutral-Bull / Neutral / Neutral-Bear / Bearish
-- RISK (1-5): 1 = low volatility, 5 = binary high-impact event imminent
-- TRADE RANK (1-5): 1 = avoid, 5 = highest conviction setup
-- Scenario probabilities must sum to 100%
-- Omit the CONFLICT/GEOPOLITICAL STATUS section if no material geopolitical event is in the news bundle
-- Remove the INSTRUCTIONS FOR CLAUDE section from the output
+- RISK scale: 1 = realised vol at multi-month lows, no scheduled events; 2 = quiet, minor data due; 3 = moderate, scheduled tier-2 data or ongoing theme; 4 = major scheduled event within 48h (FOMC, NFP, CPI); 5 = binary event today or acute unresolved crisis
+- TRADE RANK scale: 1 = no edge, avoid; 2 = marginal setup, context only; 3 = moderate conviction, manageable risk; 4 = high conviction, defined catalyst and level; 5 = highest conviction, asymmetric risk/reward with clear trigger
+- In the scenario table, BRENT, S&P 500, and BTC columns show approximate price levels (e.g., "$94", "6,900"), not percentage moves.
+- Scenario probabilities must sum to 100%.
+- Omit the CONFLICT/GEOPOLITICAL STATUS section if no material geopolitical event is in the news bundle.
+- This INSTRUCTIONS section must not appear anywhere in the generated report.

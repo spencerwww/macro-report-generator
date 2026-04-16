@@ -7,6 +7,7 @@ from fredapi import Fred
 EQUITY_TICKERS = {
     "SP500": "^GSPC",
     "NASDAQ": "^IXIC",
+    "NASDAQ100": "^NDX",
     "DOW": "^DJI",
     "VIX": "^VIX",
     "NIKKEI": "^N225",
@@ -24,6 +25,9 @@ FX_TICKERS = {
     "USDCHF": "USDCHF=X",
     "NZDUSD": "NZDUSD=X",
     "DXY": "DX-Y.NYB",
+    "EURJPY": "EURJPY=X",
+    "GBPJPY": "GBPJPY=X",
+    "EURGBP": "EURGBP=X",
 }
 
 CRYPTO_TICKERS = {
