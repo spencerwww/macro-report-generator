@@ -78,3 +78,9 @@ def test_fetch_news_uses_default_queries_when_none_given():
          patch.dict("os.environ", {"TAVILY_API_KEY": "test-key"}):
         fetch_news()
     assert mock.search.call_count == len(DEFAULT_QUERIES)
+
+
+def test_fetch_news_returns_empty_list_when_api_key_missing(monkeypatch):
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+    result = fetch_news(["test query"])
+    assert result == []

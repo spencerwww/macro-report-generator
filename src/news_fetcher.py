@@ -18,7 +18,7 @@ DEFAULT_QUERIES = [
 ]
 
 
-def fetch_news(queries: list = None) -> list:
+def fetch_news(queries: list[str] = None) -> list[dict]:
     """
     Run Tavily searches for each query. Returns list of result dicts,
     each with query, title, content, url, and published_date fields.
@@ -26,7 +26,14 @@ def fetch_news(queries: list = None) -> list:
     if queries is None:
         queries = DEFAULT_QUERIES
 
-    client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+    # Guard TAVILY_API_KEY before TavilyClient instantiation
+    api_key = os.environ.get("TAVILY_API_KEY")
+    if not api_key:
+        print("[news_fetcher] WARNING: TAVILY_API_KEY is not set — returning empty news bundle", file=sys.stderr)
+        return []
+
+    client = TavilyClient(api_key=api_key)
+    seen_urls: set = set()
     results = []
 
     for query in queries:
@@ -35,14 +42,19 @@ def fetch_news(queries: list = None) -> list:
                 query=query,
                 search_depth="basic",
                 max_results=3,
-                include_published_date=True,
+                topic="news",
+                days=3,
             )
             for item in response.get("results", []):
+                url = item.get("url", "")
+                if url in seen_urls:
+                    continue
+                seen_urls.add(url)
                 results.append({
                     "query": query,
                     "title": item.get("title", ""),
                     "content": item.get("content", ""),
-                    "url": item.get("url", ""),
+                    "url": url,
                     "published_date": item.get("published_date", ""),
                 })
         except Exception as e:
