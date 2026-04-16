@@ -7,3 +7,9 @@ __pycache__/
 dist/
 build/
 .DS_Store
+venv/
+.venv/
+env/
+Thumbs.db
+desktop.ini
+macro_report_blueprint.md
