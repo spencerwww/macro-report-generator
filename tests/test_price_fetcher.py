@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from unittest.mock import patch, MagicMock
-from price_fetcher import fetch_prices
+from price_fetcher import fetch_prices, fetch_macro
 
 
 def _mock_ticker(close_values):
@@ -94,3 +94,37 @@ def test_fetch_prices_all_commodities_present():
         result = fetch_prices()
     for asset in ["BRENT", "WTI", "GOLD", "SILVER", "COPPER", "NAT_GAS"]:
         assert asset in result["commodities"], f"{asset} missing from commodities"
+
+
+def test_fetch_macro_returns_required_keys():
+    mock_fred = MagicMock()
+    mock_fred.get_series.return_value = pd.Series(
+        [3.3], index=pd.to_datetime(["2026-03-01"])
+    )
+    with patch("price_fetcher.Fred", return_value=mock_fred):
+        result = fetch_macro()
+    for key in ["cpi_yoy", "ppi_mom", "fed_funds", "treasury_10y", "treasury_2y"]:
+        assert key in result, f"{key} missing from macro bundle"
+
+
+def test_fetch_macro_values_have_source_and_url():
+    mock_fred = MagicMock()
+    mock_fred.get_series.return_value = pd.Series(
+        [3.3], index=pd.to_datetime(["2026-03-01"])
+    )
+    with patch("price_fetcher.Fred", return_value=mock_fred):
+        result = fetch_macro()
+    cpi = result["cpi_yoy"]
+    assert "value" in cpi
+    assert "source" in cpi
+    assert "url" in cpi
+    assert "as_of" in cpi
+    assert "fred.stlouisfed.org" in cpi["url"]
+
+
+def test_fetch_macro_handles_fred_error_gracefully():
+    mock_fred = MagicMock()
+    mock_fred.get_series.side_effect = Exception("FRED API error")
+    with patch("price_fetcher.Fred", return_value=mock_fred):
+        result = fetch_macro()
+    assert result["cpi_yoy"]["value"] is None

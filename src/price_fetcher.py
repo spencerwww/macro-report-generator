@@ -1,6 +1,8 @@
 import sys
+import os
 import yfinance as yf
 import pandas as pd
+from fredapi import Fred
 
 EQUITY_TICKERS = {
     "SP500": "^GSPC",
@@ -86,3 +88,62 @@ def fetch_prices() -> dict:
         "crypto": _fetch_ticker_data(CRYPTO_TICKERS),
         "commodities": _fetch_ticker_data(COMMODITY_TICKERS),
     }
+
+
+FRED_SERIES = {
+    "cpi_yoy": {
+        "series_id": "CPIAUCSL",
+        "url": "https://fred.stlouisfed.org/series/CPIAUCSL",
+        "description": "CPI All Urban Consumers (YoY%)",
+    },
+    "ppi_mom": {
+        "series_id": "PPIACO",
+        "url": "https://fred.stlouisfed.org/series/PPIACO",
+        "description": "PPI All Commodities",
+    },
+    "fed_funds": {
+        "series_id": "FEDFUNDS",
+        "url": "https://fred.stlouisfed.org/series/FEDFUNDS",
+        "description": "Federal Funds Effective Rate",
+    },
+    "treasury_10y": {
+        "series_id": "DGS10",
+        "url": "https://fred.stlouisfed.org/series/DGS10",
+        "description": "10-Year Treasury Yield",
+    },
+    "treasury_2y": {
+        "series_id": "DGS2",
+        "url": "https://fred.stlouisfed.org/series/DGS2",
+        "description": "2-Year Treasury Yield",
+    },
+}
+
+
+def fetch_macro() -> dict:
+    """Fetch macro indicators from FRED. Returns dict with source URL on every value."""
+    try:
+        fred = Fred(api_key=os.environ["FRED_API_KEY"])
+    except Exception as e:
+        print(f"[price_fetcher] WARNING: failed to initialise FRED client: {e}", file=sys.stderr)
+        return {key: {"value": None, "as_of": None, "source": meta["description"], "url": meta["url"]}
+                for key, meta in FRED_SERIES.items()}
+
+    result = {}
+    for key, meta in FRED_SERIES.items():
+        try:
+            series = fred.get_series(meta["series_id"]).dropna()
+            result[key] = {
+                "value": round(float(series.iloc[-1]), 4),
+                "as_of": series.index[-1].strftime("%Y-%m-%d"),
+                "source": meta["description"],
+                "url": meta["url"],
+            }
+        except Exception as e:
+            print(f"[price_fetcher] WARNING: failed to fetch FRED series {meta['series_id']}: {e}", file=sys.stderr)
+            result[key] = {
+                "value": None,
+                "as_of": None,
+                "source": meta["description"],
+                "url": meta["url"],
+            }
+    return result
