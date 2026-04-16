@@ -1,7 +1,6 @@
-import os
+import sys
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timezone
 
 EQUITY_TICKERS = {
     "SP500": "^GSPC",
@@ -58,8 +57,8 @@ def _fetch_ticker_data(ticker_map: dict) -> dict:
                 }
                 continue
             latest = float(hist["Close"].iloc[-1])
-            prev = float(hist["Close"].iloc[-2]) if len(hist) >= 2 else latest
-            change_pct = round(((latest - prev) / prev) * 100, 2) if prev else None
+            prev = float(hist["Close"].iloc[-2]) if len(hist) >= 2 else None
+            change_pct = round(((latest - prev) / prev) * 100, 2) if prev is not None else None
             result[name] = {
                 "value": round(latest, 4),
                 "change_pct": change_pct,
@@ -67,7 +66,8 @@ def _fetch_ticker_data(ticker_map: dict) -> dict:
                 "symbol": symbol,
                 "as_of": hist.index[-1].strftime("%Y-%m-%d"),
             }
-        except Exception:
+        except Exception as e:
+            print(f"[price_fetcher] WARNING: failed to fetch {symbol}: {e}", file=sys.stderr)
             result[name] = {
                 "value": None,
                 "change_pct": None,

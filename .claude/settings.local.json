@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python -c \"import anthropic; import yfinance; import pandas; import fredapi; import tavily; import pytest; print\\('All imports successful!'\\)\")",
+      "Bash(pip show *)",
+      "Bash(python -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(python -m pytest tests/ --collect-only)",
+      "Bash(pytest *)",
+      "Bash(python *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(grep -E \"\\\\.py$\")"
+    ]
+  }
+}
