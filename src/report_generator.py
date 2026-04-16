@@ -7,19 +7,21 @@ def generate_report(data_bundle: dict, template: str) -> str:
     """
     Call Claude claude-sonnet-4-6 to synthesise the macro report from the data bundle.
     Uses prompt caching on the system prompt to reduce API costs on daily runs.
-    The template's {DATE} and {TIME} placeholders are substituted before sending to Claude.
-    """
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-    # Substitute date/time placeholders in template before sending to Claude
+    The template is passed UNCHANGED into the system prompt so the prompt remains
+    static day-to-day and cache hits actually fire. The {DATE}/{TIME} values are
+    passed via the user message instead, where Claude is instructed to substitute them.
+    """
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+
     date_str = data_bundle.get("date", "")
     time_str = data_bundle.get("timestamp", "")[:16].replace("T", " ")
-    resolved_template = template.replace("{DATE}", date_str).replace("{TIME}", time_str)
 
+    # System prompt uses the raw template — no substitution — so it stays cacheable.
     system_prompt = f"""You are a professional macro analyst generating a daily trading-oriented macro report.
 
 Follow this template structure exactly:
-{resolved_template}
+{template}
 
 Critical rules:
 - Use ONLY the price values from the data bundle. Do not invent, estimate, or change values.
@@ -33,16 +35,20 @@ Critical rules:
 - Remove the INSTRUCTIONS FOR CLAUDE section from the output
 """
 
+    # Per-request variables go in the user message so the system prompt stays static.
     user_content = f"""Generate today's macro report using this data bundle:
 
 {json.dumps(data_bundle, indent=2, default=str)}
 
-Today's date: {data_bundle['date']}
+Today's date: {date_str}
+Report time: {time_str} UTC
+
+In the report header, replace {{DATE}} with {date_str} and {{TIME}} with {time_str}.
 """
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=8000,
+        max_tokens=10000,
         system=[
             {
                 "type": "text",
