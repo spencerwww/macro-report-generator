@@ -2,7 +2,7 @@ name: Daily Macro Report
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # 12:00 UTC daily
+    - cron: '17 11 * * *'
   workflow_dispatch:          # Allow manual trigger for testing
 
 env:
