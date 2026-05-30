@@ -3,7 +3,7 @@ import json
 import anthropic
 
 
-def generate_report(data_bundle: dict, template: str) -> str:
+def generate_report(data_bundle: dict, template: str, recent_reports: list[dict] | None = None) -> str:
     """
     Call Claude claude-sonnet-4-6 to synthesise the macro report from the data bundle.
     Uses prompt caching on the system prompt to reduce API costs on daily runs.
@@ -33,7 +33,18 @@ Critical rules:
 - Scenario probabilities must sum to 100%
 - Omit the CONFLICT/GEOPOLITICAL STATUS section if no material geopolitical event is in the news bundle
 - Remove the INSTRUCTIONS FOR CLAUDE section from the output
+- You may be given the previous reports as continuity context in the user message. Do NOT re-report the same news articles or restate unchanged background. When a level or bias is unchanged, say so briefly (e.g. "unchanged from prior session") and focus each section on what is NEW or has CHANGED since those reports.
 """
+
+    # Build continuity block from prior reports (per-run data — stays out of system prompt).
+    recent_reports = recent_reports or []
+    if recent_reports:
+        prior_block = "\n\n".join(
+            f"=== PREVIOUS REPORT ({r['date']}) ===\n{r['content']}"
+            for r in recent_reports
+        )
+    else:
+        prior_block = "(No previous reports available — this is the first report or earlier reports are missing.)"
 
     # Per-request variables go in the user message so the system prompt stays static.
     user_content = f"""Generate today's macro report using this data bundle:
@@ -44,6 +55,11 @@ Today's date: {date_str}
 Report time: {time_str} UTC
 
 In the report header, replace {{DATE}} with {date_str} and {{TIME}} with {time_str}.
+
+PREVIOUS REPORTS (most recent last) — continuity context. Do NOT repeat the same
+news articles, background, or framing already covered below. Lead with what is new
+or changed since these reports:
+{prior_block}
 """
 
     response = client.messages.create(

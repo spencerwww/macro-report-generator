@@ -32,6 +32,13 @@ Rules:
 - Only cite URLs that appear in the data bundle — do not invent sources
 - Be specific and concise — traders read this before market open
 - Do not repeat information already in the report in the Verified section; just confirm it
+
+Continuity context: the report's author was given the previous reports as
+continuity context, so the report may reference prior sessions (e.g. "unchanged
+from yesterday", "as noted previously"). Those prior reports are NOT in your data
+bundle. Do not list such a statement as Disputed solely because the comparison
+value is absent from the bundle — only dispute claims about TODAY'S data that
+conflict with, or are unsupported by, the bundle.
 """
 
     user_content = f"""Fact-check this report against the raw data bundle.

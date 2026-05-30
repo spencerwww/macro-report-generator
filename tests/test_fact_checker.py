@@ -84,3 +84,19 @@ def test_fact_check_uses_prompt_caching():
         isinstance(s, dict) and s.get("cache_control") == {"type": "ephemeral"}
         for s in system
     )
+
+
+def test_fact_check_system_prompt_notes_continuity_context():
+    """Fact-checker must know the generator saw prior reports, so continuity
+    references aren't auto-disputed for being absent from the data bundle."""
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[MagicMock(text="## FACT-CHECK & INSIGHTS")]
+    )
+    with patch("fact_checker.anthropic.Anthropic", return_value=mock_client):
+        with patch.dict(os.environ, ENV):
+            fact_check(SAMPLE_REPORT, SAMPLE_BUNDLE)
+    system_text = mock_client.messages.create.call_args[1]["system"][0]["text"]
+    lowered = system_text.lower()
+    assert "previous report" in lowered or "prior report" in lowered
+    assert "continuity" in lowered
