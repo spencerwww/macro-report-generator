@@ -39,7 +39,7 @@ Cover all pairs in the dashboard: EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD, U
 ## 4. COMMODITIES
 ### Energy
 For each commodity, use the same block structure as FX.
-Cover: Brent Crude, WTI Crude, TTF Natural Gas, Henry Hub Natural Gas
+Cover: Brent Crude, WTI Crude, Henry Hub Natural Gas
 
 ### Precious Metals
 Cover: Gold (XAU/USD), Silver (XAG/USD)
@@ -91,7 +91,6 @@ Cover: BTC, ETH, XRP, SOL
 |-------|-------|------|------------|--------------|-----------------|
 | Brent Crude | | | | | |
 | WTI Crude | | | | | |
-| TTF Nat Gas | | | | | |
 | Henry Hub | | | | | |
 | Gold | | | | | |
 | Silver | | | | | |

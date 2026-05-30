@@ -14,7 +14,7 @@ DEFAULT_QUERIES = [
     "IMF World Bank global growth outlook",
     "central bank rate decisions hikes cuts",
     "US CPI PPI inflation data latest",
-    "natural gas TTF Henry Hub price today",
+    "natural gas Henry Hub price today",
 ]
 
 
