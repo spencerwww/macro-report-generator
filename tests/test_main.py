@@ -102,3 +102,22 @@ def test_load_recent_reports_returns_empty_when_n_zero(tmp_path):
     reports.mkdir()
     (reports / "2026-05-29.md").write_text("report", encoding="utf-8")
     assert load_recent_reports(reports_dir=str(reports), n=0) == []
+
+
+def test_run_pipeline_passes_recent_reports_to_generator(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "reports").mkdir()
+    (tmp_path / "reports" / "2026-01-01.md").write_text("old report", encoding="utf-8")
+    (tmp_path / "templates").mkdir()
+    (tmp_path / "templates" / "report_template.md").write_text("# Template")
+
+    with patch("main.fetch_prices", return_value={"equities": {}, "fx": {}, "crypto": {}, "commodities": {}}), \
+         patch("main.fetch_macro", return_value={}), \
+         patch("main.fetch_news", return_value=[]), \
+         patch("main.generate_report", return_value="# MACRO REPORT\n\nContent") as mock_gen, \
+         patch("main.fact_check", return_value="# MACRO REPORT\n\nContent\n\n---\n\n## FACT-CHECK"):
+
+        run_pipeline()
+
+    recent = mock_gen.call_args[1]["recent_reports"]
+    assert [r["date"] for r in recent] == ["2026-01-01"]

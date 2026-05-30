@@ -71,7 +71,8 @@ def run_pipeline() -> str:
 
     print("[5/6] Generating report...")
     template = Path("templates/report_template.md").read_text(encoding="utf-8")
-    report = generate_report(bundle, template)
+    recent_reports = load_recent_reports(n=2, before_date=bundle["date"])
+    report = generate_report(bundle, template, recent_reports=recent_reports)
 
     print("[6/6] Running fact-check...")
     final_report = fact_check(report, bundle)
