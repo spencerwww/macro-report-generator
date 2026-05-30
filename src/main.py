@@ -17,7 +17,7 @@ from fact_checker import fact_check
 DATE_FILE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})\.md$")
 
 
-def load_recent_reports(reports_dir: str = "reports", n: int = 2, before_date: str = None) -> list[dict]:
+def load_recent_reports(reports_dir: str = "reports", n: int = 2, before_date: str | None = None) -> list[dict]:
     """Load up to n most recent prior report files, oldest first.
 
     Report files are named YYYY-MM-DD.md. Files matching before_date (today)
@@ -27,6 +27,8 @@ def load_recent_reports(reports_dir: str = "reports", n: int = 2, before_date: s
     """
     dir_path = Path(reports_dir)
     if not dir_path.is_dir():
+        return []
+    if n <= 0:
         return []
     dated = []
     for f in dir_path.iterdir():

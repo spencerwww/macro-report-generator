@@ -94,3 +94,11 @@ def test_load_recent_reports_ignores_non_dated_files(tmp_path):
     (reports / "2026-05-29.md").write_text("report", encoding="utf-8")
     result = load_recent_reports(reports_dir=str(reports), n=2)
     assert [r["date"] for r in result] == ["2026-05-29"]
+
+
+def test_load_recent_reports_returns_empty_when_n_zero(tmp_path):
+    from main import load_recent_reports
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    (reports / "2026-05-29.md").write_text("report", encoding="utf-8")
+    assert load_recent_reports(reports_dir=str(reports), n=0) == []
