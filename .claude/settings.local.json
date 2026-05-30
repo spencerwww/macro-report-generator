@@ -14,7 +14,10 @@
       "Bash(grep -E \"\\\\.py$\")",
       "Bash(git init *)",
       "Bash(git *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(& \"C:\\\\Users\\\\spenc\\\\AppData\\\\Local\\\\Python\\\\bin\\\\python.exe\" -m pytest tests/test_main.py -k load_recent_reports -v 2>&1')",
+      "Bash(py -m pytest tests/test_main.py -v)"
     ]
   }
 }
