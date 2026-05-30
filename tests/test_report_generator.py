@@ -103,3 +103,61 @@ def test_resolved_date_appears_in_user_message_not_system():
     user_content = call_kwargs["messages"][0]["content"]
     assert "2026-04-16" in user_content
     assert "12:00" in user_content
+
+
+SAMPLE_RECENT = [
+    {"date": "2026-04-14", "content": "# REPORT 04-14\nBrent unchanged."},
+    {"date": "2026-04-15", "content": "# REPORT 04-15\nGold rallied."},
+]
+
+
+def test_generate_report_injects_recent_reports_into_user_message():
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[MagicMock(text="# MACRO REPORT")]
+    )
+    with patch("report_generator.anthropic.Anthropic", return_value=mock_client):
+        with patch.dict(os.environ, ENV):
+            generate_report(SAMPLE_BUNDLE, SAMPLE_TEMPLATE, recent_reports=SAMPLE_RECENT)
+    user_content = mock_client.messages.create.call_args[1]["messages"][0]["content"]
+    assert "REPORT 04-14" in user_content
+    assert "REPORT 04-15" in user_content
+
+
+def test_generate_report_recent_reports_not_in_system_prompt():
+    """Prior reports are per-run data — they must stay out of the cached system prompt."""
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[MagicMock(text="# MACRO REPORT")]
+    )
+    with patch("report_generator.anthropic.Anthropic", return_value=mock_client):
+        with patch.dict(os.environ, ENV):
+            generate_report(SAMPLE_BUNDLE, SAMPLE_TEMPLATE, recent_reports=SAMPLE_RECENT)
+    system_text = mock_client.messages.create.call_args[1]["system"][0]["text"]
+    assert "REPORT 04-14" not in system_text
+    assert "Gold rallied" not in system_text
+
+
+def test_generate_report_works_without_recent_reports():
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[MagicMock(text="# MACRO REPORT")]
+    )
+    with patch("report_generator.anthropic.Anthropic", return_value=mock_client):
+        with patch.dict(os.environ, ENV):
+            result = generate_report(SAMPLE_BUNDLE, SAMPLE_TEMPLATE)
+    assert isinstance(result, str)
+    user_content = mock_client.messages.create.call_args[1]["messages"][0]["content"]
+    assert "No previous reports" in user_content
+
+
+def test_generate_report_system_prompt_has_continuity_rule():
+    mock_client = MagicMock()
+    mock_client.messages.create.return_value = MagicMock(
+        content=[MagicMock(text="# MACRO REPORT")]
+    )
+    with patch("report_generator.anthropic.Anthropic", return_value=mock_client):
+        with patch.dict(os.environ, ENV):
+            generate_report(SAMPLE_BUNDLE, SAMPLE_TEMPLATE)
+    system_text = mock_client.messages.create.call_args[1]["system"][0]["text"]
+    assert "continuity" in system_text.lower()
