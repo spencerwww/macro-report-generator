@@ -3,7 +3,7 @@ import json
 import anthropic
 
 
-def generate_report(data_bundle: dict, template: str, recent_reports: list[dict] = None) -> str:
+def generate_report(data_bundle: dict, template: str, recent_reports: list[dict] | None = None) -> str:
     """
     Call Claude claude-sonnet-4-6 to synthesise the macro report from the data bundle.
     Uses prompt caching on the system prompt to reduce API costs on daily runs.

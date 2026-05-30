@@ -122,6 +122,7 @@ def test_generate_report_injects_recent_reports_into_user_message():
     user_content = mock_client.messages.create.call_args[1]["messages"][0]["content"]
     assert "REPORT 04-14" in user_content
     assert "REPORT 04-15" in user_content
+    assert user_content.index("REPORT 04-14") < user_content.index("REPORT 04-15")
 
 
 def test_generate_report_recent_reports_not_in_system_prompt():
