@@ -1,6 +1,8 @@
 import os
 import sys
+import re
 import html
+import requests
 import markdown as md
 
 _STYLE = """
@@ -14,6 +16,9 @@ _STYLE = """
   th { background: #f2f2f2; }
   a { color: #1a5fb4; }
 """
+
+
+RESEND_ENDPOINT = "https://api.resend.com/emails"
 
 
 def render_html(markdown_text: str, report_date: str) -> str:
@@ -30,3 +35,60 @@ def render_html(markdown_text: str, report_date: str) -> str:
         f"{body}\n"
         "</body>\n</html>\n"
     )
+
+
+def _report_date_from_path(report_path: str) -> str:
+    """Extract YYYY-MM-DD from a reports/YYYY-MM-DD.md path, else empty string."""
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", os.path.basename(report_path))
+    return m.group(1) if m else ""
+
+
+def send_report(report_path: str) -> bool:
+    """Read the report, render HTML, POST to Resend. Never raises.
+
+    Returns True only on a 2xx response. Logs a warning and returns False on any
+    failure (missing env, missing file, non-2xx, network error).
+    """
+    api_key = os.environ.get("RESEND_API_KEY")
+    recipient = os.environ.get("REPORT_RECIPIENT_EMAIL")
+    sender = os.environ.get("RESEND_FROM", "onboarding@resend.dev")
+
+    if not api_key:
+        print("[email_sender] WARNING: RESEND_API_KEY not set — skipping email", file=sys.stderr)
+        return False
+    if not recipient:
+        print("[email_sender] WARNING: REPORT_RECIPIENT_EMAIL not set — skipping email", file=sys.stderr)
+        return False
+
+    try:
+        with open(report_path, "r", encoding="utf-8") as f:
+            markdown_text = f.read()
+    except OSError as e:
+        print(f"[email_sender] WARNING: could not read {report_path}: {e}", file=sys.stderr)
+        return False
+
+    report_date = _report_date_from_path(report_path)
+    html_body = render_html(markdown_text, report_date)
+
+    try:
+        resp = requests.post(
+            RESEND_ENDPOINT,
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "from": sender,
+                "to": recipient,
+                "subject": f"Macro Report — {report_date}",
+                "html": html_body,
+            },
+            timeout=30,
+        )
+    except requests.RequestException as e:
+        print(f"[email_sender] WARNING: Resend request failed: {e}", file=sys.stderr)
+        return False
+
+    if resp.status_code // 100 != 2:
+        print(f"[email_sender] WARNING: Resend returned {resp.status_code}", file=sys.stderr)
+        return False
+
+    print(f"[email_sender] Sent report {report_date} to {recipient}")
+    return True

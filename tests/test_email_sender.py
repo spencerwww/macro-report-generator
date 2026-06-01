@@ -45,3 +45,36 @@ def test_render_html_includes_inline_style_block():
     html = render_html(SAMPLE_MD, "2026-06-01")
     assert "<style>" in html
     assert "table" in html  # table styling present
+
+
+def _env(**overrides):
+    base = {
+        "RESEND_API_KEY": "re_test_key",
+        "REPORT_RECIPIENT_EMAIL": "me@example.com",
+        "RESEND_FROM": "onboarding@resend.dev",
+    }
+    base.update(overrides)
+    return base
+
+
+def test_send_report_posts_to_resend_and_returns_true(tmp_path):
+    report = tmp_path / "2026-06-01.md"
+    report.write_text(SAMPLE_MD, encoding="utf-8")
+
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    with patch("email_sender.requests.post", return_value=mock_resp) as mock_post, \
+         patch.dict("os.environ", _env(), clear=True):
+        from email_sender import send_report
+        result = send_report(str(report))
+
+    assert result is True
+    assert mock_post.call_count == 1
+    args, kwargs = mock_post.call_args
+    assert "api.resend.com" in args[0]
+    assert kwargs["headers"]["Authorization"] == "Bearer re_test_key"
+    payload = kwargs["json"]
+    assert payload["to"] == "me@example.com"
+    assert payload["from"] == "onboarding@resend.dev"
+    assert payload["subject"] == "Macro Report — 2026-06-01"
+    assert "<table>" in payload["html"]
