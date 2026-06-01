@@ -46,6 +46,14 @@ COMMODITY_TICKERS = {
     "NAT_GAS": "NG=F",
 }
 
+# Personal watchlist — hand-picked instruments tracked alongside the macro feed.
+WATCHLIST_TICKERS = {
+    "DSY": "DSY.PA",
+    "SIE": "SIE.DE",
+    "SMH": "SMH",
+    "WQTM": "WQTM",
+}
+
 
 def _fetch_ticker_data(ticker_map: dict) -> dict:
     result = {}
@@ -91,6 +99,7 @@ def fetch_prices() -> dict:
         "fx": _fetch_ticker_data(FX_TICKERS),
         "crypto": _fetch_ticker_data(CRYPTO_TICKERS),
         "commodities": _fetch_ticker_data(COMMODITY_TICKERS),
+        "watchlist": _fetch_ticker_data(WATCHLIST_TICKERS),
     }
 
 

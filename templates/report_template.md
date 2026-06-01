@@ -22,21 +22,32 @@ If no material geopolitical conflict is present, omit this section entirely.
 
 ---
 
-## 3. FOREIGN EXCHANGE
+## 3. PERSONAL WATCHLIST
+
+Hand-picked instruments tracked alongside the macro feed. For each, use the same block structure as the other ticker sections:
+
+**{ASSET} — ~{LEVEL}** | Bias: {BIAS}
+- {1-2 sentences of context}. [Source: URL]
+- Catalyst: {SPECIFIC UPCOMING CATALYST}
+
+Cover all watchlist instruments: Dassault Systèmes (DSY.PA), Siemens (SIE.DE), SMH (VanEck Semiconductor ETF), WQTM (WisdomTree Quantum Computing ETF)
+
+---
+
+## 4. FOREIGN EXCHANGE
 ### Major Pairs
 
 For each pair, use this exact block structure:
 
 **{PAIR} — ~{LEVEL}** | Bias: {BIAS}
 - {1-2 sentences of context}. [Source: URL]
-- Key levels: {SUPPORT} support | {RESISTANCE} resistance
 - Catalyst: {SPECIFIC UPCOMING CATALYST}
 
 Cover all pairs in the dashboard: EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD, USD/CHF, NZD/USD, EUR/JPY, GBP/JPY, EUR/GBP
 
 ---
 
-## 4. COMMODITIES
+## 5. COMMODITIES
 ### Energy
 For each commodity, use the same block structure as FX.
 Cover: Brent Crude, WTI Crude, Henry Hub Natural Gas
@@ -49,7 +60,7 @@ Cover: Copper, Iron Ore (if data available)
 
 ---
 
-## 5. GLOBAL EQUITY INDICES
+## 6. GLOBAL EQUITY INDICES
 ### US Equities
 Cover: S&P 500, Nasdaq 100, Dow Jones. Include earnings context if relevant.
 
@@ -61,14 +72,14 @@ Cover: DAX. Include ECB/BoE context.
 
 ---
 
-## 6. CRYPTOCURRENCY
+## 7. CRYPTOCURRENCY
 Cover each asset with the same block structure:
 **{ASSET} — ~{LEVEL}** | Bias: {BIAS}
 Cover: BTC, ETH, XRP, SOL
 
 ---
 
-## 7. ALL-ASSET SUMMARY DASHBOARD
+## 8. ALL-ASSET SUMMARY DASHBOARD
 
 **This is the most important section. Populate every cell. Do not leave blanks.**
 
@@ -85,6 +96,14 @@ Cover: BTC, ETH, XRP, SOL
 | EUR/JPY | | | | | |
 | GBP/JPY | | | | | |
 | EUR/GBP | | | | | |
+
+### Watchlist
+| ASSET | LEVEL | BIAS | RISK (1-5) | KEY CATALYST | TRADE RANK (1-5) |
+|-------|-------|------|------------|--------------|-----------------|
+| DSY (Dassault Systèmes) | | | | | |
+| SIE (Siemens) | | | | | |
+| SMH | | | | | |
+| WQTM | | | | | |
 
 ### Commodities
 | ASSET | LEVEL | BIAS | RISK (1-5) | KEY CATALYST | TRADE RANK (1-5) |
@@ -117,7 +136,7 @@ Cover: BTC, ETH, XRP, SOL
 
 ---
 
-## 8. WEEK AHEAD / SCENARIO ANALYSIS
+## 9. WEEK AHEAD / SCENARIO ANALYSIS
 
 | SCENARIO | PROBABILITY | TRIGGER | BRENT | S&P 500 | BTC |
 |----------|-------------|---------|-------|---------|-----|
@@ -131,7 +150,7 @@ List 3-5 key upcoming catalysts for the week with dates.
 
 ## INSTRUCTIONS FOR CLAUDE (DO NOT INCLUDE THIS SECTION IN YOUR OUTPUT)
 - In the report header, replace {DATE} with today's date from the bundle and {TIME} with the HH:MM from the bundle timestamp.
-- In Sections 3-6, replace all {PLACEHOLDER} tokens (e.g., {PAIR}, {LEVEL}, {BIAS}, {SUPPORT}, {RESISTANCE}, {ASSET}) with actual values from the data bundle.
+- In Sections 3-7, replace all {PLACEHOLDER} tokens (e.g., {PAIR}, {LEVEL}, {BIAS}, {ASSET}) with actual values from the data bundle.
 - Use ONLY the price values from the data bundle. Do not invent, estimate, or change values.
 - Every specific data point must include an inline [Source: URL] citation from the data bundle.
 - Populate every cell in the ALL-ASSET SUMMARY DASHBOARD tables — no blanks.

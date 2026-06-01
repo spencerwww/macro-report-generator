@@ -13,10 +13,10 @@ def _mock_ticker(close_values):
     return mock
 
 
-def test_fetch_prices_returns_four_categories():
+def test_fetch_prices_returns_five_categories():
     with patch("price_fetcher.yf.Ticker", return_value=_mock_ticker([6885.0, 6967.38])):
         result = fetch_prices()
-    assert set(result.keys()) == {"equities", "fx", "crypto", "commodities"}
+    assert set(result.keys()) == {"equities", "fx", "crypto", "commodities", "watchlist"}
 
 
 def test_fetch_prices_sp500_present():
@@ -94,6 +94,22 @@ def test_fetch_prices_all_commodities_present():
         result = fetch_prices()
     for asset in ["BRENT", "WTI", "GOLD", "SILVER", "COPPER", "NAT_GAS"]:
         assert asset in result["commodities"], f"{asset} missing from commodities"
+
+
+def test_fetch_prices_all_watchlist_present():
+    with patch("price_fetcher.yf.Ticker", return_value=_mock_ticker([100.0, 102.0])):
+        result = fetch_prices()
+    for asset in ["DSY", "SIE", "SMH", "WQTM"]:
+        assert asset in result["watchlist"], f"{asset} missing from watchlist"
+
+
+def test_fetch_prices_watchlist_symbols_map_correctly():
+    with patch("price_fetcher.yf.Ticker", return_value=_mock_ticker([100.0, 102.0])):
+        result = fetch_prices()
+    assert result["watchlist"]["DSY"]["symbol"] == "DSY.PA"
+    assert result["watchlist"]["SIE"]["symbol"] == "SIE.DE"
+    assert result["watchlist"]["SMH"]["symbol"] == "SMH"
+    assert result["watchlist"]["WQTM"]["symbol"] == "WQTM"
 
 
 def test_fetch_macro_returns_required_keys():
