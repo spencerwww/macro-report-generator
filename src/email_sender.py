@@ -103,6 +103,6 @@ def default_report_path() -> str:
 
 if __name__ == "__main__":
     path = sys.argv[1] if len(sys.argv) > 1 else default_report_path()
-    ok = send_report(path)
+    send_report(path)
     # Non-fatal: always exit 0 so a delivery failure never fails the CI job.
     sys.exit(0)

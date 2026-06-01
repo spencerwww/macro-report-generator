@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from email_sender import render_html
+from email_sender import render_html, _report_date_from_path
 
 
 SAMPLE_MD = """# Daily Macro Report
@@ -139,3 +139,11 @@ def test_default_report_path_uses_utc_today():
     from datetime import datetime, timezone
     expected = f"reports/{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.md"
     assert default_report_path() == expected
+
+
+def test_report_date_from_path_extracts_date():
+    assert _report_date_from_path("reports/2026-06-01.md") == "2026-06-01"
+
+
+def test_report_date_from_path_returns_empty_when_no_date():
+    assert _report_date_from_path("reports/latest.md") == ""
