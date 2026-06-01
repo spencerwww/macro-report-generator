@@ -132,3 +132,10 @@ def test_send_report_returns_false_on_network_error(tmp_path):
         from email_sender import send_report
         result = send_report(str(report))
     assert result is False
+
+
+def test_default_report_path_uses_utc_today():
+    from email_sender import default_report_path
+    from datetime import datetime, timezone
+    expected = f"reports/{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.md"
+    assert default_report_path() == expected
