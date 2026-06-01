@@ -63,3 +63,14 @@ Run each command in its own shell call — do not chain with `&&`.
 ## Adding assets
 
 To add a new ticker to the price feed, add it to the relevant dict in `src/price_fetcher.py` (`EQUITY_TICKERS`, `FX_TICKERS`, `CRYPTO_TICKERS`, or `COMMODITY_TICKERS`) and add the corresponding row to the relevant table in `templates/report_template.md`. Then add a test in `tests/test_price_fetcher.py` asserting the asset is present.
+
+### Personal watchlist (add/remove a ticker)
+
+The watchlist is the personal list of instruments rendered as Section 3 of the report. To add or remove one, edit these four places — all keyed by the short name (e.g. `DSY`) and its Yahoo Finance symbol (e.g. `DSY.PA`):
+
+1. **`src/price_fetcher.py`** — the `WATCHLIST_TICKERS` dict (`"NAME": "YAHOO_SYMBOL"`). This is the only data-layer change; it flows into the bundle as `prices["watchlist"]` automatically.
+2. **`templates/report_template.md`** — the `Cover all watchlist instruments:` line in **Section 3. PERSONAL WATCHLIST** (the prose list Claude renders one block per).
+3. **`templates/report_template.md`** — the `### Watchlist` table in **Section 8. ALL-ASSET SUMMARY DASHBOARD** (one row per instrument).
+4. **`tests/test_price_fetcher.py`** — `test_fetch_prices_all_watchlist_present` and `test_fetch_prices_watchlist_symbols_map_correctly`.
+
+US-listed symbols use the bare ticker (e.g. `SMH`, `WQTM`); non-US listings need the Yahoo exchange suffix (`.PA` Paris, `.DE` XETRA, `.L` London, `.MI` Milan). Verify a new symbol resolves on Yahoo before committing — an unresolvable symbol degrades to `null` rather than erroring, so it fails silently. Run `python -m pytest tests/test_price_fetcher.py -v` after editing.
