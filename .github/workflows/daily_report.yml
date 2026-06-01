@@ -40,3 +40,11 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add reports/
           git diff --staged --quiet || (git commit -m "report: $(date -u +%Y-%m-%d)" && git push)
+
+      - name: Email report
+        continue-on-error: true
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          REPORT_RECIPIENT_EMAIL: ${{ secrets.REPORT_RECIPIENT_EMAIL }}
+          RESEND_FROM: onboarding@resend.dev
+        run: PYTHONPATH=src python src/email_sender.py
