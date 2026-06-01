@@ -78,3 +78,57 @@ def test_send_report_posts_to_resend_and_returns_true(tmp_path):
     assert payload["from"] == "onboarding@resend.dev"
     assert payload["subject"] == "Macro Report — 2026-06-01"
     assert "<table>" in payload["html"]
+
+
+def test_send_report_returns_false_when_api_key_missing(tmp_path):
+    report = tmp_path / "2026-06-01.md"
+    report.write_text(SAMPLE_MD, encoding="utf-8")
+    with patch("email_sender.requests.post") as mock_post, \
+         patch.dict("os.environ", _env(RESEND_API_KEY=""), clear=True):
+        from email_sender import send_report
+        result = send_report(str(report))
+    assert result is False
+    assert mock_post.call_count == 0
+
+
+def test_send_report_returns_false_when_recipient_missing(tmp_path):
+    report = tmp_path / "2026-06-01.md"
+    report.write_text(SAMPLE_MD, encoding="utf-8")
+    with patch("email_sender.requests.post") as mock_post, \
+         patch.dict("os.environ", _env(REPORT_RECIPIENT_EMAIL=""), clear=True):
+        from email_sender import send_report
+        result = send_report(str(report))
+    assert result is False
+    assert mock_post.call_count == 0
+
+
+def test_send_report_returns_false_on_missing_file():
+    with patch("email_sender.requests.post") as mock_post, \
+         patch.dict("os.environ", _env(), clear=True):
+        from email_sender import send_report
+        result = send_report("reports/does-not-exist.md")
+    assert result is False
+    assert mock_post.call_count == 0
+
+
+def test_send_report_returns_false_on_non_2xx(tmp_path):
+    report = tmp_path / "2026-06-01.md"
+    report.write_text(SAMPLE_MD, encoding="utf-8")
+    mock_resp = MagicMock()
+    mock_resp.status_code = 422
+    with patch("email_sender.requests.post", return_value=mock_resp), \
+         patch.dict("os.environ", _env(), clear=True):
+        from email_sender import send_report
+        result = send_report(str(report))
+    assert result is False
+
+
+def test_send_report_returns_false_on_network_error(tmp_path):
+    import requests as real_requests
+    report = tmp_path / "2026-06-01.md"
+    report.write_text(SAMPLE_MD, encoding="utf-8")
+    with patch("email_sender.requests.post", side_effect=real_requests.RequestException("boom")), \
+         patch.dict("os.environ", _env(), clear=True):
+        from email_sender import send_report
+        result = send_report(str(report))
+    assert result is False
