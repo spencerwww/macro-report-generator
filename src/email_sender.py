@@ -1,5 +1,6 @@
 import os
 import sys
+import html
 import markdown as md
 
 _STYLE = """
@@ -18,11 +19,12 @@ _STYLE = """
 def render_html(markdown_text: str, report_date: str) -> str:
     """Convert report markdown to a styled, email-safe HTML document."""
     body = md.markdown(markdown_text, extensions=["tables", "extra"])
+    safe_date = html.escape(report_date)
     return (
         "<!DOCTYPE html>\n"
         '<html lang="en">\n<head>\n'
         '<meta charset="utf-8">\n'
-        f"<title>Macro Report — {report_date}</title>\n"
+        f"<title>Macro Report — {safe_date}</title>\n"
         f"<style>{_STYLE}</style>\n"
         "</head>\n<body>\n"
         f"{body}\n"

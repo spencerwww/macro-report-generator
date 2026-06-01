@@ -27,7 +27,12 @@ def test_render_html_returns_full_document():
 def test_render_html_converts_table_to_html_table():
     html = render_html(SAMPLE_MD, "2026-06-01")
     assert "<table>" in html
-    assert "<td>S&amp;P 500</td>" in html or "<td>S&P 500</td>" in html
+    assert "<td>S&amp;P 500</td>" in html
+
+
+def test_render_html_includes_report_date_in_title():
+    html = render_html(SAMPLE_MD, "2026-06-01")
+    assert "<title>Macro Report — 2026-06-01</title>" in html
 
 
 def test_render_html_includes_heading_content():
