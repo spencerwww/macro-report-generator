@@ -56,6 +56,16 @@ Secrets required in **Settings → Secrets and variables → Actions → Reposit
 
 Manual trigger available via **Actions → Daily Macro Report → Run workflow**.
 
+### Email delivery
+
+After the report is committed, the `Email report` step runs `src/email_sender.py`, which renders the markdown to styled HTML and sends it via the Resend API. It is **non-fatal** (`continue-on-error: true`, and the script always exits 0) — a delivery failure never fails the job or affects the committed report.
+
+Additional secrets:
+- `RESEND_API_KEY` — Resend API key.
+- `REPORT_RECIPIENT_EMAIL` — destination address.
+
+The sender is set via the workflow `env:` `RESEND_FROM` (default `onboarding@resend.dev`, Resend's shared sandbox sender). To send from a custom address, verify a domain in Resend and change `RESEND_FROM` in the workflow — no code change needed. `send_report` follows the same warn-and-skip degradation as the fetchers: missing keys, a missing report file, or a non-2xx response log to stderr and return `False`.
+
 ## Shell commands
 
 Run each command in its own shell call — do not chain with `&&`.
